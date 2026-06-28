@@ -40,3 +40,43 @@ You can start React from `<script>` tags or toolchains and frameworks such as:
 
 To exit out of you dev server hit `Ctrl + C`
 To start your dev server type `npm run dev` in the terminal 
+
+**Link your React App to an existing GitHub repo**
+
+If you created a GitHub repo and cloned it, cd into the repo, then run the following in the terminal: 
+`npm create vite@latest . -- --template react`
+
+- Vite will use the current directory for the project instead of making a new one w/ the given name
+
+- The cloned directory will be init as a repo & connected to the right remote
+
+--- 
+
+## Diving Deeper: Folders and Files
+
+* The `public` folder is where all of the static assests related to the app goes
+    - Images
+    - Icons
+    - Information files 
+
+* The `src` folder is where the code that runs the App lives
+    - `main.jsx` is the entry point of the app:
+
+```JavaScript
+    import { StrictMode } from 'react'
+    import { createRoot } from 'react-dom/client'
+    import './index.css'
+    import App from './App.jsx'
+
+    createRoot(document.getElementById('root')).render(
+    <StrictMode>
+        <App />
+    </StrictMode>,
+    )
+```
+
+- `StrictMode` and `createRoot` are imported from `react` and `react-dom` packages
+- The `App` component is imported from the `App.jsx` file 
+- CSS styling is imported 
+- A `root` object is created w/ a `createRoot` and element from `index.html`
+- The `render` method is invoked (attached to `root`) w/ _JSX_ 
