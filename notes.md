@@ -314,3 +314,511 @@ export default function Person(){
 ```
 
 ---
+
+## Passing Data Between Components (React Props)
+
+* In React, Data is transferred from parent components to child components via **props**.
+    - This transfer is unidirectional (flows in only one direction)
+    - Changes to the data only affects the child component not parent or sibling
+        - This restriction gives explicit control over it
+
+**Using Props in React**
+
+`Example.jsx`
+```JavaScript
+function Button(){
+    return <button>Click!</button>
+}
+
+export default function App(){
+    return (
+        <div>
+            <Button />
+        </div>
+    )
+}
+```
+
+- What if you wanted another button to say "Don't Click!"?
+- What if you wanted another button to be Blue?
+
+_Create a component for a specific feature would be time consuming and against the principles of DRY (Don't Repeat Yourself) and "Reusuable Components" in the 1st place._
+
+`ButtonProp.jsx`
+```JavaScript
+
+function Button(props){
+    const buttonStyle = {
+        color: props.color,
+        fontSize: props.fontSize + 'px'
+    };
+
+    return (
+        <button style={buttonStyle}>{props.text}</button>
+    )
+}
+
+
+export default function App(){
+    return(
+        <div>
+            <Button text="Click Me!" color="blue", fo1ntSize={12} />
+            <Button text="Don't Click Me!" color="Red", fontSize={12} />
+    );
+}
+```
+
+- The `Button` function takes in a `props` parameter
+    - the properties are referenced with the `props.propertyName`
+    - When rendering `Button` components, `prop` values are defined on each component
+    - Inline styles are dynamically generated and applied to the `Button` element
+
+
+**Prop destructuring**
+
+- Unpacking props in the component params allows for more concise and readable code
+
+```JavaScript
+function Button({text, color, fontSize}){
+    const buttonStyle = {
+        color: color,
+        fontSize: fontSize + "px"
+    };
+
+    return <button style={buttonStyle}>{text}</button>
+}
+
+export default function App(){
+    return (
+        <div>
+            <Button text="Click Me!" color='blue', fontSize={12}>
+        </div>
+    )
+}
+```
+
+**Default props**
+
+In order to stop repeating yourself by re-defining common values, define default params to set def values for props
+
+```JavaScript
+
+function Button({text = "Click Me!", color="blue", fontSize = 12}){
+    const buttonStyle = {
+        color: color, 
+        fontSize: fontSize + "px"
+    };
+
+    return <button style={buttonStyle}>{text}</button>
+}
+
+export default function App(){
+    return (
+        <div>
+            <Button />
+            <Button text="Don't Click Me!" color="red">
+        </div>
+    );
+}
+```
+
+_React no longer accepts a `defaultProps` obj, although you may see it in some codebases._ 
+
+**Functions as props**
+
+In addition to passing vars through to child components, you can pass through functions
+
+```JavaScript
+function Button({ text = "Click Me!", color = "blue", fontSize = 12, handleClick }){
+  const buttonStyle = {
+    color: color,
+    fontSize: fontSize + "px"
+    };
+
+  return (
+    <button onClick={handleClick} style={buttonStyle}>
+      {text}
+    </button>
+  );
+}
+
+export default function App() {
+  const handleButtonClick = () => {
+    window.location.href = "https://www.google.com";
+  };
+
+  return (
+    <div>
+      <Button handleClick={handleButtonClick} />
+    </div>
+  );
+}
+
+```
+
+- `handleButtonClick` is defined in the parent
+- A reference is passed as the val for the `handleClack` prop on the Button Component
+- A click event is recieved in `Button` and is called a click event 
+
+_NOTE_: `handleButonClick` is passed as a reference w/o paranthesis. If `handleButtonClick()` is called, then the function would be called as the button renders
+
+
+_Note_: You don't need the whole props object, so you can destructure it!
+Hence: `export default function Button({text, color, fontSize, handleClick}) //({})`
+- Don't miss the pair of { } inside of ( ) when declaring props!
+    - This is called _destructuring_!
+
+**Fowarding props**
+
+Sometimes passing props gets repetitive
+```JavaScript
+function Profile({ person, size, isSepia, thickBorder }) {
+  return (
+    <div className="card">
+      <Avatar
+        person={person}
+        size={size}
+        isSepia={isSepia}
+        thickBorder={thickBorder}
+      />
+    </div>
+  );
+}
+```
+
+Some components foward all their props to their children
+Sometimes it can make sense to use the _Spread_ Syntax
+
+```JavaScript
+function Profile(props) {
+  return (
+    <div className="card">
+      <Avatar {...props} />
+    </div>
+  );
+}
+```
+- All of profiles props are passed to the avatar w/o listing each of their names
+    - Use spread w/ restraint!
+
+
+* When you nest content inside JSX, the parent component will get that content in a prop called children
+
+--- 
+
+## Rendering Techniques 
+
+Rendering a list of elements can be long and tedious
+- Using a data structure like an arry is more efficient
+
+```JavaScript
+function App(){
+    const animals = ['Dog', 'Cat', 'Snake']
+    
+    return (
+        <div>
+            <h1>Animals</h1>
+            <ul>
+                {animals.map((animal) => {
+                    return <li key={animal}>{animal}</li>;
+                })}
+            </ul>
+        </div>
+    );
+}
+```
+
+- arr `animals` is defined
+- inside the jsx, `map` is used to return a new array of list elements, with `animal` as its text
+
+The following is also identical:
+```JavaScript
+function App() {
+  const animals = ["Lion", "Cow", "Snake", "Lizard"];
+  const animalsList = animals.map((animal) => <li key={animal}>{animal}</li>)
+
+  return (
+    <div>
+      <h1>Animals: </h1>
+      <ul>
+        {animalsList}
+      </ul>
+    </div>
+  );
+}
+```
+
+* What is **`key`**? 
+    - When we dynamically render lists of components, we must give the top level component a key (essentially an ID for the component)
+
+
+**Rendering a list of components**
+```JavaScript 
+function ListItem(props){
+    return <li style={{listStyle:"none"}}>{props.team}</li>
+}
+
+function List(props){
+    return (
+        <ul>
+            {props.teams.map((team) => {
+                return <ListItem key ={team} team={team} />
+            })}
+        </ul>
+    );
+}
+
+export default function Teams() {
+    const teams = ['GSW', 'ATL', 'MIA', 'DEN', 'OKC', 'MIL', 'BKN', 'PHI',
+        'ORL', 'CHA', 'POR', 'SAC', 'TOR', 'BOS', 'WAS', 'DAL', 'SA', 'HOU', 'CHI', 'MEM',
+        'PHX', 'MIN', 'LAL', 'LAC', 'IND', 'NO', 'UTA', 'DET', 'CLE'];
+
+    return(
+        <div>
+            <h1>Teams: </h1>
+            <List teams={teams} />
+        </div>
+    );
+
+}
+```
+
+- `ul` is moved to a diff component `List`
+    - it still returns a `ul` 
+
+- `List` accepts the arr of teams as a prop
+    - And passes each individual team as a prop to `ListItem` component
+
+**Conditionally rendering UI**
+
+- What if we want to render an Team that starts w/ the letter 'M'?
+    - We would need to use a conditional expression
+
+```JavaScript
+function List(props){
+    return (
+        <ul>
+            {props.teams.map((team) => {
+                return team.startsWith('M') ? <li key={team} style={{listStyle:"none"}}>{team}</li> : null; 
+            })}
+        </ul>
+    );
+}
+
+export default function Teams() {
+    const teams = ['GSW', 'ATL', 'MIA', 'DEN', 'OKC', 'MIL', 'BKN', 'PHI',
+        'ORL', 'CHA', 'POR', 'SAC', 'TOR', 'BOS', 'WAS', 'DAL', 'SA', 'HOU', 'CHI', 'MEM',
+        'PHX', 'MIN', 'LAL', 'LAC', 'IND', 'NO', 'UTA', 'DET', 'CLE'];
+
+    return(
+        <div>
+            <h1>Teams: </h1>
+            <List teams={teams} />
+        </div>
+    );
+
+}
+```
+
+- `startsWith` checks if the team starts with 'M'
+    - renders the team, otherwise `null` is returned 
+
+* You can also conditionally render an element by using the `&&` operator:
+
+```JavaScript
+function List(props){
+    return (
+        <ul>
+            {props.teams.map((team) => {
+                return team.startsWith('M') && <li key={team} style={{listStyle:"none"}}>{team}</li>;
+            })}
+        </ul>
+    );
+}
+
+export default function Teams() {
+    const teams = ['GSW', 'ATL', 'MIA', 'DEN', 'OKC', 'MIL', 'BKN', 'PHI',
+        'ORL', 'CHA', 'POR', 'SAC', 'TOR', 'BOS', 'WAS', 'DAL', 'SA', 'HOU', 'CHI', 'MEM',
+        'PHX', 'MIN', 'LAL', 'LAC', 'IND', 'NO', 'UTA', 'DET', 'CLE'];
+
+    return(
+        <div>
+            <h1>Teams: </h1>
+            <List teams={teams} />
+        </div>
+    );
+}
+```
+
+- If the 1st operand is `true` then it returns the 2nd operand (`li`), otherwise its false
+
+_Note_: When using `&&` for conditional rendering, don't put numbers on the left side!
+- JS auto converts the left side to a boolean automatically
+    - if the left is 0, the whole expression is 0  
+
+_Other ways to render conditionally_ 
+1. `if`, `if/else`, and `switch`
+
+```JavaScript
+function List(props){
+    if(!props.teams){
+        return <div>Loading</div>
+    }
+
+    if(props.teams.legnth == 0){
+        return <div>There are no teams!</div>
+    }
+
+    return (
+        <ul>
+            {props.teams.map((team) => {
+                return <li key={team}>{team}</li>;
+            })}
+        </ul>
+    );
+}
+
+```
+
+* _Note_ Arrow function implicitly return the expression right after the `=>` so you dont need a `return` statement 
+    - However you MUST write `return` if your `=>` is followed by an opening curly brace!
+
+--- 
+
+## Keys 
+
+- A Key is a _string_ or _number_ that uniquely identifies it among other items in that array
+    - You need to give each array item a `key`
+    - JSX elements directly inside a `map()` call ALWAYS need keys!
+
+
+* Keys tell React which array item each component corresponds to, so that it can match up to them later
+    - This becomes important if you array items can move, a `key` helps React infer what's happened and make correct updates to the DOM
+
+- Include keys in your data than generating them on the fly
+
+```JavaScript
+export const people = [{
+  id: 0, // Used in JSX as a key
+  name: 'Creola Katherine Johnson',
+  profession: 'mathematician',
+  accomplishment: 'spaceflight calculations',
+  imageId: 'MK3eW3A'
+}, {
+  id: 1, // Used in JSX as a key
+  name: 'Mario José Molina-Pasquel Henríquez',
+  profession: 'chemist',
+  accomplishment: 'discovery of Arctic ozone hole',
+  imageId: 'mynHUSa'
+}, {
+  id: 2, // Used in JSX as a key
+  name: 'Mohammad Abdus Salam',
+  profession: 'physicist',
+  accomplishment: 'electromagnetism theory',
+  imageId: 'bE7W1ji'
+}, {
+  id: 3, // Used in JSX as a key
+  name: 'Percy Lavon Julian',
+  profession: 'chemist',
+  accomplishment: 'pioneering cortisone drugs, steroids and birth control pills',
+  imageId: 'IOjWm71'
+}, {
+  id: 4, // Used in JSX as a key
+  name: 'Subrahmanyan Chandrasekhar',
+  profession: 'astrophysicist',
+  accomplishment: 'white dwarf star mass calculations',
+  imageId: 'lrWQx8l'
+}];
+
+```
+* _NOTE_ the `<></>` Fragment Syntax won't let you pass a key
+    - Either group them into a single `div` 
+    - Use the `<Fragement></Fragment>` Syntax
+
+```JavaScript
+import { Fragment } from 'react';
+
+const listItems = people.map(person =>
+  <Fragment key={person.id}>
+    <h1>{person.name}</h1>
+    <p>{person.bio}</p>
+  </Fragment>
+);
+```
+
+* Fragments Dissapear on the DOM
+
+**Where to get your keys**
+- Data from a Database: If data is coming from a databse, you can use database keys/IDs, which are unique by nature
+
+- Locally generated data: If your data is generated and persisted locally, use an incrementing counter `crypto.randomUUID()` or a package like `uuid` when creating items 
+
+**Rules of Keys**
+
+- They must be unique amongst siblings 
+- They must not change
+
+**Why are Keys needed in React?** 
+- They let us uniquely identify an item between its siblings. 
+- They provide more info than the position within the array
+- Even if the pos changes, the `key` lets React identify the item throughout its lifetime
+
+- If you update state, it's still the same instance of the component
+    - React will know this bc the key hasn't changed
+    - If the key changes, React knows its a new instance of that component and can build a new one w/ fresh states
+
+    **Rendering lists**
+    - `.map()` is used to iterate over an arr of data and return a component
+        - if the list changes, we want to either re-render that list or find the specific items and only re-render those
+            - for that, we need keys 
+
+    **Using keys**
+```JavaScript
+    <Component key={keyValue} />
+    <div key={keyValue}></div>
+```
+
+- The `key` prop is private (only for internal React stuff)
+    - It's not passed to the component via the props param
+
+_Unique Keys_
+```JavaScript
+// a list of todos, each todo object has a task and an id
+const todos = [
+  { task: "mow the yard", id: crypto.randomUUID() },
+  { task: "Work on Odin Projects", id: crypto.randomUUID() },
+  { task: "feed the cat", id: crypto.randomUUID() },
+];
+
+function TodoList() {
+  return (
+    <ul>
+      {todos.map((todo) => (
+        // here we are using the already generated id as the key.
+        <li key={todo.id}>{todo.task}</li>
+      ))}
+    </ul>
+  );
+}
+```
+- `crypto.randomUUID()` generates a unique ID 
+
+_Notes_ 
+- Don't use an items index in the arr as its key
+    - React will use that if you dont specify a `key` at all 
+    - The will get changed over time if items are removed, inserted, etc. 
+    - Indexes as keys can lead to subtle and confusing bugs
+
+- Don't generate keys on the fly w/ `key={Math.random()}` or `crypto.randomUUID()`
+    - Keys will never match up between renders 
+    - Leading to components and DOM being recreated every time
+
+- Components won't recieve a `key` as a prop.
+
+**Keys and State**
+
+- Dynamically rendering lists is the most common situation where you'd need to provide a key
+
+---
+
+## State
