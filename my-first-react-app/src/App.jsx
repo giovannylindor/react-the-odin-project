@@ -15,7 +15,6 @@ function App() {
   return (
     <>
       <Button text="Click Me!" backgroundColor="#fff"/>
-      <Teams />
     </>
   )
 }

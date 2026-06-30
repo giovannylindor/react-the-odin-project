@@ -149,7 +149,7 @@ createRoot(document.getElementById('root')).render(
 
 ## JSX
 
-* JSX is a syntax extension that lets you write HTML-like markup inside JavaSCRipt
+* JSX is a syntax extension that lets you write HTML-like markup inside JavaScript
      - Its not required to use JSX for react components but it makes writing them concise
     
 * Its syntactic sugar (syntax designed to be easier to read/write) for the `createElement` function in React
@@ -322,6 +322,8 @@ export default function Person(){
     - Changes to the data only affects the child component not parent or sibling
         - This restriction gives explicit control over it
 
+- Props are essentially properties that pass info from one component to another.
+
 **Using Props in React**
 
 `Example.jsx`
@@ -342,7 +344,7 @@ export default function App(){
 - What if you wanted another button to say "Don't Click!"?
 - What if you wanted another button to be Blue?
 
-_Create a component for a specific feature would be time consuming and against the principles of DRY (Don't Repeat Yourself) and "Reusuable Components" in the 1st place._
+_Creating a component for a specific feature would be time consuming and against the principles of DRY (Don't Repeat Yourself) and "Reusuable Components" in the 1st place._
 
 `ButtonProp.jsx`
 ```JavaScript
@@ -422,7 +424,7 @@ export default function App(){
 }
 ```
 
-_React no longer accepts a `defaultProps` obj, although you may see it in some codebases._ 
+_React no longer accepts a `defaultProps` object, although you may see it in some codebases._ 
 
 **Functions as props**
 
@@ -822,3 +824,210 @@ _Notes_
 ---
 
 ## State
+
+* Any app you build is likely to change as a user is exploring it
+    - Could be basic as:
+        - Toggling down a dropdown menu
+        - Fetching Data from an API
+
+React provides primates (built-in features) to manipulate the state of your apps & components, to make them dynamic
+
+What is state: **_Current State of your Program_**
+- In programming: **_The data which is manipulated and reflected by your program_**
+- In React: **_State is a components MEMORY._**
+
+
+**`useState` hook**
+
+- `useState` hook is a built-in hook in React that allows you to define state in a functional component
+    - Take an initial val as a param
+    - Returns an arr w/ 2 elements that we can destructure to get
+        1. Current State Value
+        2. Function to Update the State
+
+_Example_
+`const [stateVar, setFunction] = useState(initialValue);`
+- The `[ ]` syntax is _Array Destructuring_ and it lets you read vals from an array. 
+
+`useState` Pattern
+```JavaScript
+
+const [stateVal, setStateVal] = useState(initValue);
+
+//use case
+const [backgroundColor, setBackgroundColor] = useState(COLORS[0]);
+```
+
+* `backgroundColor` state is defined w/ the hook
+    - On every btn, we set a click event handler that calls `setBackgroundColor`
+
+
+**How does state work?**
+
+- When a components state/props change:
+    - React runs your component function again from the beginning 
+        - to figure out what should be displayed based on state & props
+    - All changes are applied to the DOM 
+    - The entire component is _Re-Rendered_
+- Re-Rendering enables efficient UI updates in response to data changes
+
+* Virtual DOM (Document Object Model Tree): Lightweight Representation of the DOM 
+that React uses to keep track of the current UI state  
+
+_Example_: `const [backgroundColor, setBackgroundColor] = useState(COLORS[0]);`
+
+* Wherever `setBackgroundColor` is called:
+    -  `App` is rerendred
+        - The component is recreated 
+    - `backgroundColor` doesn't get rerendered as React takes responsibility of keeping track of the latest state and providing it to the component. The inital state value `backgroundColor` is used for the 1st render and ignored 
+
+![](/imgs/01.png)
+
+
+
+_Example From react.dev_
+```JavaScript
+const[index, setIndex] = useState(0);
+```
+
+1. Component renders for the 1st time.
+    - 0 is passed as the initial value, it will return `[0, setIndex]`
+2. You update the state
+    - User clicks btn &rarr; it calls `setIndex(index + 1)` 
+    - index was 0, but now React remebers that index is 1.
+3. 2nd Render
+    - React sees `useState(0)`, but react doesnt need it
+    - it remebers and returns `[1, setIndex]`
+---
+
+**Additional Notes**
+
+* State is isolated and private
+    - State is local to a component instance on the screen 
+    - If you render the same component twice, they will have isolated state
+
+    **Rendering Components**
+    The process of requesting and serving UI consists of 3 steps
+    1. Triggering Render
+        - Components intial render
+        - Done by calling `createRoot(document.getElementByID('root')).render(< Component/>)`
+        - Once initial render done, updates to state auto queues a render
+    2. Rendering Component
+        - After triggering, React calls components to figure out what to display
+        - On ititial render: React calls root
+        - On Renders After: React calls the function component `setFunction` whose state triggered the render 
+    3. Commiting to the DOM
+        - Initial Render: React uses `appendChild()` to put all nodes on sceen
+        - Re-Renders: React applies minimal necessary operations to make the DOM match the latest output
+            - React only changes DOM nodes if theirs a difference between renders 
+
+## Hooks 
+
+* Hooks are functions that let you use React features. 
+    - All hooks are recognizable by the `use` prefix
+
+1. Hooks can only be called from the top level of a component. 
+2. Hooks can't be called from inside loops or conditions. 
+
+* Hooks are only available while React is rendering
+    - They let you Hook into different features 
+
+
+### More on State
+
+**How to Structure State** 
+
+* State should NOT be mutated
+    - This leads to unpredictable results
+    - Primatives are immutable (unchangable)
+    * _If you're objects and arrays, never mutate them!_
+
+==_Treat State as Immutable_==
+
+`dontDo.jsx`
+```JavaScript
+  const [person, setPerson] = useState({ name: "John", age: 100 });
+
+  // BAD - Don't do this!
+  const handleIncreaseAge = () => {
+    // mutating the current state object
+    person.age = person.age + 1;
+    setPerson(person);
+  };
+```
+
+`doThis.jsx`
+```JavaScript
+  // GOOD - Do this!
+  const handleIncreaseAge = () => {
+    // copy the existing person object into a new object
+    // while updating the age property
+    const newPerson = { ...person, age: person.age + 1 };
+    setPerson(newPerson);
+  };
+```
+
+- Create a new obj + copy existing state val + providing a new val for `age`
+    - If we don't provide a new obj to `setState` it's not guaranteed for re-rendering
+    - We should always provide a new obj for `setState` to trigger a rerender
+
+**How state updates**
+
+- State updates are _asynchronous_
+    - whenever you call `setState` React will apply the update in the next render 
+
+**State updater functions**
+
+`snippet.jsx`
+```JavaScript
+const handleIncreaseAge = () => {
+  setPerson({ ...person, age: person.age + 1 });
+  setPerson({ ...person, age: person.age + 1 });
+};
+```
+
+- The `handleIncreaseAge()` function doesn't increase age by 2
+    - It replaces the current person w/ and increase by one
+        - Then does the SAME thing
+            - Ex (age === 10): age: 10 + 1
+                - Then: age: 10 + 1
+                    - On Re-render: age === 11
+
+* React will replace the current state w/ the value passed in 
+    - What if I want to update the state multiple times using the latest state? 
+        - **STATE HELPER FUNCTIONS**
+
+```JavaScript
+const handleIncreaseAge = () => {
+  setPerson((prevPerson) => ({ ...prevPerson, age: prevPerson.age + 1 }));
+  setPerson((prevPerson) => ({ ...prevPerson, age: prevPerson.age + 1 }));
+};
+```
+- When a callback is passed, it ensure the latest state is passed!
+    - Updaters aren't always necessary
+
+
+**Controlled Components**
+
+* There are native HMTL elements that maintain their own internal state
+    - EX: `input`
+        - You type into `input` &rarr; it updates its own val on every keystroke
+            - There are many cases where you'd like to control the value
+                - **CONTROLLED COMPONENTS**
+
+```JavaScript
+function CustomInput() {
+  const [value, setValue] = useState("");
+
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={(event) => setValue(event.target.value)}
+    />
+  );
+}
+```
+- Instead of letting the input maintain its own state, we define our own state using the `useState` hook.
+
+**_This pattern is extremely useful wherever you need user input, i.e., typing in a textbox, toggling a checkbox, etc. _**
