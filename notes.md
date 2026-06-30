@@ -1031,3 +1031,80 @@ function CustomInput() {
 - Instead of letting the input maintain its own state, we define our own state using the `useState` hook.
 
 **_This pattern is extremely useful wherever you need user input, i.e., typing in a textbox, toggling a checkbox, etc. _**
+
+
+**Additional Notes**
+- A states variable value never changes within a render
+
+Principles for structuring State
+1. Group related state
+    - if you update 2+ state vars, merge them into a single state var
+2. Avoid contradictions
+    - When state is structured, several pieces may disagree w/ each other
+    - Avoid leaving room for mistakes
+3. Avoid redundant (unecessary) State
+    - If you can calc info from the props or existing state var
+    - Don't pass that into the components state
+4. Avoid duplication in state
+    - When same data is duplicated between state vars and nested objects, its hard to sync
+
+5. Avoid deeply nested state
+
+
+_1. Group Related State_
+
+Instead of
+```JavaScript
+const [x, setX] = useState(0);
+const [y, setY] = useState(0);
+```
+
+`Do THIS`
+```JavaScript
+const [position, setPosition] = useState({ x: 0, y: 0 });
+```
+
+_2. Avoid Contradictions_
+
+See this:
+```JavaScript
+export default function FeedbackForm() {
+  const [text, setText] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [isSent, setIsSent] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setIsSending(true);
+    await sendMessage(text);
+    setIsSending(false);
+    setIsSent(true);
+  }
+```
+
+- This code works, but leaves room for contradictions
+    - if you forget to call `sentIsSent` and `setIsSending` together, both could be true at the same time
+
+`Instead`
+```JavaScript
+export default function FeedbackForm() {
+  const [text, setText] = useState('');
+  const [status, setStatus] = useState('typing');
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setStatus('sending');
+    await sendMessage(text);
+    setStatus('sent');
+  }
+```
+
+
+_3. Avoid redundant state_
+
+See 
+```JavaScript
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [fullName, setFullName] = useState('');
+```
