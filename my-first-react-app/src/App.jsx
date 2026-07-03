@@ -7,6 +7,7 @@ import FavoriteFood from './components/FavoriteFood'
 import { FavoritePlayer } from './components/FavoritePlayer'
 import Animals from './components/Animals'
 import Teams from './components/Teams'
+import Clock from './components/Clock'
 
 
 
@@ -14,7 +15,7 @@ function App() {
 
   return (
     <>
-      <Button text="Click Me!" backgroundColor="#fff"/>
+  
     </>
   )
 }

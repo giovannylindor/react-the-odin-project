@@ -1108,3 +1108,36 @@ See
   const [lastName, setLastName] = useState('');
   const [fullName, setFullName] = useState('');
 ```
+
+---
+
+## `useEffect`
+
+`useEffect` is a React Hook that tells React to complete code when: 
+- A component re-renders
+- A component mounts (create + add to the DOM)
+- When the State Val Changes 
+
+Syntax: `useEffect(function, [dependencies])`
+
+1. `useEffect(() => {})` &rarr; complete code when the component re-renders
+2. `useEffect(() => {}, [])` &rarr; complete code when the component mounts 
+3. `useEffect(() => {}, [value])` &rarr; complete code when component mounts + value changes
+
+Use Cases
+1. Event Listeners
+2. DOM Manipulation
+3. Real-Time Updates
+4. Fetching Data from API
+5. Clean up Component Unmounts
+
+
+Cleanup Function 
+- A retun statement that unmounts a component and does cleanup
+- `return () => { }` &rarr; do the code before the next re-render(if no dependencies) or when the component unmounts
+
+
+**Lifestyle of an Effect**
+1. Component mounts whens its added to the screen 
+2. Component updates when it gets props/states
+3. Component unmounts when its removed from the screen 
