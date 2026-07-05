@@ -1,19 +1,43 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect, use } from "react";
 
-export default function Clock() {
-  const [counter, setCounter] = useState(0);
+
+export default function Clock (){
+  const[count, setCount] = useState(0);
+  const[timerOn, setTimerOn] = useState(false); 
+
+  const resetCount = () => {
+    setCount(0);
+  
+  }
+  
+  const handleClick = () => {
+    setTimerOn((p) => !p); 
+  }
 
   useEffect(() => {
-    const key = setInterval(() => {
-      setCounter(count => count + 1)
-    }, 1000);
+    if(!timerOn) return;
+    
+    const timer = setInterval(() => {
+
+      setCount((c) => c + 1); 
+    }, 1000)
 
     return () => {
-      clearInterval(key);
-    };
-  }, [])
+      clearInterval(timer); 
+    }
 
-  return (
-    <p>{counter} seconds have passed.</p>
+  }, [timerOn]);
+
+  return(
+    <>
+      <p>{count}</p>
+      <button onClick={handleClick}
+      style={{padding: '1.5rem', width:'5rem', margin:'auto'}}>
+        {timerOn ? 'Stop': 'Start'}
+      </button>
+
+      <button onClick={resetCount} 
+      style={{width: '3rem', margin:'auto'}}>Reset</button>
+    </>
   );
 }

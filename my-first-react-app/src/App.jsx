@@ -8,14 +8,14 @@ import { FavoritePlayer } from './components/FavoritePlayer'
 import Animals from './components/Animals'
 import Teams from './components/Teams'
 import Clock from './components/Clock'
-
+import AutoSave from './components/AutoSave'
 
 
 function App() {
 
   return (
     <>
-  
+      <AutoSave /> 
     </>
   )
 }
