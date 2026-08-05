@@ -1141,3 +1141,23 @@ Cleanup Function
 1. Component mounts whens its added to the screen 
 2. Component updates when it gets props/states
 3. Component unmounts when its removed from the screen 
+
+- - -
+
+## React Router
+
+The browser allows JS to manage user navigation through the _History API_. This tracks/enables a site to interact w/ the browsers session history (pages visited in a given window)
+
+
+**Client-Side Routing**
+
+* Client-side routing is routing where JavaScript takes over the duty of handling Routes in an application. 
+    - This helps in building SPA (Single-Page Applications) without refreshing during navigation
+
+* In general multi-page applications, the browser reloads everytime you click on a link to navigate
+    - w/ CSR you never leave the page you're on
+        - JS intercepts link request instead of letting them go straight to the server
+
+* React Router is a standard routing library for React applications
+    - We can specify components that can be rendered based on the route
+
