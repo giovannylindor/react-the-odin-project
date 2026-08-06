@@ -1161,3 +1161,471 @@ The browser allows JS to manage user navigation through the _History API_. This 
 * React Router is a standard routing library for React applications
     - We can specify components that can be rendered based on the route
 
+**Client-Side Routing & Single-Page Applications**
+
+Non-SPAs are typically server-based routing. This means that the server handles the logic for URL paths. The browser requests a page from the server, and the server processes it, builds the HTML and sends a page back
+- This is good for SEO and Security, but comes at the cost of slower navigation. 
+
+Modern-Day browsers have allowed it to where: 
+- HTML is cheap to load & render
+- Shared resources don't get reloaded due to caching
+- Pages only appear when they're ready
+
+SPAs replaces SSR with CSR
+- JS processes all the requests instead of sending them to the server
+
+Pros: 
+- Apps/app navigation is very fast
+- SPA requests raw-data
+- Apps can cache local data, which keeps the app working if internet is lost
+
+Cons: 
+- SEO isn't the best
+- Memory Management
+
+When To Choose What
+
+SPA w/ CSR
+- Dynamic Interaction
+- Rich UI 
+- Mobile-Friendly
+- Architectural Complexity
+
+
+MPA w/ SSR
+- SEO optimization 
+- Insights & Anylitics
+- Scalability
+- Different Entry Points
+- Embedding Requirements 
+
+
+Other Web Concepts 
+- `axios` is used over `fetch` &rarr; its preferred due to its clean syntax and features
+    - Auto JSON conversion
+    - Better Error Handling
+    - HTTP interceptions
+    - Request Cancellation 
+
+- CORS stands for Cross-Origin Resource Sharing
+    - Its browser security mechanism 
+        - CORS errors block request from the frontend to an external API bc the API didnt authorize your domain
+            - Ex: `localhost:3000` sending an `axios` req to `localhost:5000`
+                - This is consisdered a cross-origin request
+
+
+
+Adding a router 
+
+1. create a page component
+```JavaScript
+const Profile = () => {
+  return (
+    <div>
+      <h1>Hello from profile page!</h1>
+      <p>So, how are you?</p>
+    </div>
+  );
+};
+
+export default Profile;
+```
+
+2. have a component that will request the page
+```JavaScript
+const App = () => {
+  return(
+    <>
+      <div>
+        <h1>Hello, from main!</h1>
+        <p>Examples of links to other pages!</p>
+        <nav>
+          <ul>
+            <li>
+              <Link to="profile">Profile Page</Link>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </>
+  );
+};
+
+export default App; 
+```
+- `<Link />` essentially prevents the full page reload instead of an `<a href>`
+
+3. add the router to `main.jsx`
+```JavaScript
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router";
+import App from "./App";
+import Profile from "./Profile";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+  },
+  {
+    path: "profile",
+    element: <Profile />,
+  },
+]);
+
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
+    <RouterProvider router={router} />
+  </StrictMode>
+);
+```
+
+- `createBrowserRouter` creates the config for a router 
+    - it passes arguments in the form of an arr of routes
+- `RouterProvider` takes the router var and renders the element based on the router var
+
+
+You can render a section of a page differently based on different urls
+Routes can be nested as a child to another one to ensure the child gets rendered w/ the parent
+
+**Nested Routes**
+
+`popeye.jsx`
+```JavaScript
+import { Link } from "react-router";
+
+const Popeye = () => {
+    return(
+        <>
+            <p>Im popeye!</p>
+            <Link to="/">Go Back</Link>
+        </>
+    );
+}
+
+export default Popeye;
+```
+
+`spinach.jsx`
+```JavaScript
+import { Link } from "react-router";
+
+const Spinach = () => {
+    return(
+        <>
+            <p>Im Spinach</p>
+            <Link to="/">Click to go back</Link>
+        </>
+    );
+};
+
+export default Spinach;
+```
+
+`main.jsx`
+```JavaScript
+import { StrictMode } from "react"
+import { createRoot } from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router";
+import App from "./App";
+import Profile from "./Profile";
+import Spinach from "./Spinach";
+import Popeye from "./Popeye";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+  },
+  {
+    path: "profile",
+    element: <Profile />,
+    children: [
+      { path: "spinach", element: <Spinach /> },
+      { path: "popeye", element: <Popeye /> },
+    ],
+  },
+]);
+
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
+    <RouterProvider router={router} />
+  </StrictMode>,
+);
+```
+
+- The children can now be accessed in an Outlet component
+    - When the route gets visited, its component gets displayed in the parent
+
+
+**Adding default component when no path is added**
+
+`defaultProfile.jsx`
+```JavaScript
+const DefaultProfile = () => {
+  return <p>Oh, nothing to see here!</p>;
+};
+
+export default DefaultProfile;
+```
+
+`main.jsx`
+```JavaScript
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router";
+import App from "./App";
+import Profile from "./Profile";
+import DefaultProfile from "./DefaultProfile";
+import Spinach from "./Spinach";
+import Popeye from "./Popeye";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+  },
+  {
+    path: "profile",
+    element: <Profile />,
+    children: [
+      { index: true, element: <DefaultProfile /> },
+      { path: "spinach", element: <Spinach /> },
+      { path: "popeye", element: <Popeye /> },
+    ],
+  },
+]);
+
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
+    <RouterProvider router={router} />
+  </StrictMode>,
+);
+```
+- when `localhost:3000/profile` is visited, the `<DefaultProfile />` component is running by def
+
+
+
+DEFINITONS:
+URL: full web address used to find a resource
+Ex: https://example.com 
+
+- https:// &rarr; protocol 
+- example.com &rarr; domain name
+- /blog/news &rarr; path 
+
+PATH: part of the url after the domain name, shows the exact location you want to see
+    Ex: /blog/news &rarr; path 
+
+ROUTE: instruction set inside code &rarr; connects the address to the function that builds the page
+
+
+_EXAMPLE_
+
+```JavaScript
+  {
+    path: "profile/:name",
+    element: <Profile />,
+  },
+```
+
+- The `:` turns the path into a *dynamic segment* it matches the changing vals in that position 
+    - These are called url params or `params`
+        - They are used w/ the `useParams` hook
+        - `useParams` extracts values from the url path
+        - the values used after the colon are variables that can be used
+
+`Profile.jsx`
+```JavaScript
+import { useParams } from "react-router";
+import DefaultProfile from "./DefaultProfile";
+import Spinach from "./Spinach";
+import Popeye from "./Popeye";
+
+const Profile = () => {
+  const { name } = useParams();
+
+  return (
+    <div>
+      <h1>Hello from profile page!</h1>
+      <p>So, how are you?</p>
+      <hr />
+      <h2>The profile visited is here:</h2>
+      {name === "popeye" ? (
+        <Popeye />
+      ) : name === "spinach" ? (
+        <Spinach />
+      ) : (
+        <DefaultProfile />
+      )}
+    </div>
+  );
+};
+
+export default Profile;
+```
+
+**bad urls**
+
+1. create an error page component 
+
+`ErrorPage.jsx`
+```JavaScript
+import { Link } from "react-router";
+
+const ErrorPage = () => {
+  return (
+    <div>
+      <h1>Oh no, this route doesn't exist!</h1>
+      <Link to="/">
+        You can go back to the home page by clicking here, though!
+      </Link>
+    </div>
+  );
+};
+
+export default ErrorPage;
+```
+
+`main.jsx`
+```JavaScript
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { createBrowserRouter, RouterProvider } from "react-router";
+import App from "./App";
+import Profile from "./Profile";
+import ErrorPage from "./ErrorPage";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "profile/:name",
+    element: <Profile />,
+  },
+]);
+
+createRoot(document.getElementById("root")).render(
+  <StrictMode>
+    <RouterProvider router={router} />
+  </StrictMode>,
+);
+```
+
+
+**Refactoring**
+
+The array of routes can have its own routes.jsx file and it can be imported and used in `main.jsx`
+
+`routes.jsx`
+```JavaScript
+import App from "./App";
+import Profile from "./Profile";
+import ErrorPage from "./ErrorPage";
+
+const routes = [
+  {
+    path: "/",
+    element: <App />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "profile/:name",
+    element: <Profile />,
+  },
+];
+
+export default routes;
+```
+
+
+**Outlets & State**
+
+* You can nest routes as children of a parent route and you can use an `<Outlet />`
+
+- If we had data in the parent element and wanted to pass it to any components from the outlet we would use a `useContext`
+
+* `useContext`
+    - hook, allows components to read/subscribe to data w/o manually passing props.
+    - usually data goes from top &rarr; bottom via props
+        - if a deeply nested component needs a piece of data, it'd have to go through every immediate component. this is called _prop drilling_
+        - `useContext` lets child components access global data DIRECTLY
+
+*STEPS*
+1. create context
+```JavaScript
+import { createContext } from 'react';
+// Creates a context holder
+export const ThemeContext = createContext();
+```
+
+2. provide the context
+    - wrap the target component (component to give data) inside the context's provider and give it a value
+```JavaScript
+import { useState } from 'react';
+import { ThemeContext } from './ThemeContext';
+import Dashboard from './Dashboard';
+
+function App() {
+  const [theme, setTheme] = useState('dark');
+
+  return (
+    // Everything inside Dashboard now has access to the 'dark' theme
+    <ThemeContext.Provider value={theme}>
+      <Dashboard />
+    </ThemeContext.Provider>
+  );
+}
+```
+
+3. use the context
+    - use the `useContext` inside any nested data to read the data
+```JavaScript
+import { useContext } from 'react';
+import { ThemeContext } from './ThemeContext';
+
+function DeeplyNestedButton() {
+  // Pulls the 'dark' value directly from the nearest provider
+  const theme = useContext(ThemeContext); 
+
+  return <button className={theme}>Click Me</button>;
+}
+```
+
+Use Cases
+
+- Themes
+- Authentication
+- Global State
+- Localization 
+
+
+* Outlets have a context prop 
+`parent`
+```JavaScript
+// Parent route
+function Parent() {
+  const [count, setCount] = React.useState(0);
+  return <Outlet context={[count, setCount]} />;
+}
+```
+
+`child`
+```JavaScript
+// Child route
+import { useOutletContext } from "react-router";
+
+function Child() {
+  const [count, setCount] = useOutletContext();
+  const increment = () => setCount((c) => c + 1);
+  return <button onClick={increment}>{count}</button>;
+}
+```
+
+
+- `useNavigate` function that lets you navigate to another path or foward/backwards in time
+    - read react router docs. 
