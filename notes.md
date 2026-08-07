@@ -1629,3 +1629,206 @@ function Child() {
 
 - `useNavigate` function that lets you navigate to another path or foward/backwards in time
     - read react router docs. 
+
+--- 
+
+## Fetching Data in React
+
+Basic `fetch` request
+
+```JavaScript
+const image = document.querySelector("img");
+fetch("https://picsum.photos/v2/list")
+  .then((response) => response.json())
+  .then((response) => {
+    image.src = response[0].download_url;
+  })
+  .catch((error) => console.error(error));
+``` 
+
+Sometimes APIs require identification. In scenarios like these, you need to include a header such as a `User-Agent` or an identifier than the API owner specifies
+
+```JavaScript
+const image = document.querySelector("img");
+fetch("https://picsum.photos/v2/list", {
+  headers: {
+    "User-Agent": "the-odin-project"
+  }
+})
+  .then((response) => response.json())
+  .then((response) => {
+    image.src = response[0].download_url;
+  })
+  .catch((error) => console.error(error));
+```
+
+- Whenever a component needs to make a request as it renders, its best to wrap that fetch in a `useEffect`
+
+**Handling Errors**
+
+Working over networks can be unreliable. 
+- APIs can go down 
+- Networks can have connection issues
+- Responses recieved could contain errors
+ 
+```JavaScript
+useEffect(() => {
+  fetch("https://picsum.photos/v2/list", {
+    headers: {
+      "User-Agent": "the-odin-project"
+    }
+  })
+    .then((response) => {
+      if (response.status >= 400) {
+        throw new Error("server error");
+      }
+      return response.json();
+    })
+    .then((response) => setImageURL(response[0].download_url))
+    .catch((error) => setError(error));
+}, []);
+```
+
+**Adding error and loading states**
+
+```JavaScript
+const Image = () => {
+  const [imageURL, setImageURL] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("https://picsum.photos/v2/list", {
+      headers: {
+        "User-Agent": "the-odin-project"
+      }
+    })
+      .then((response) => {
+        if (response.status >= 400) {
+          throw new Error("server error");
+        }
+        return response.json();
+      })
+      .then((response) => setImageURL(response[0].download_url))
+      .catch((error) => setError(error))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>A network error was encountered</p>;
+
+  return (
+    <>
+      <h1>An image</h1>
+      <img src={imageURL} alt={"placeholder text"} />
+    </>
+  );
+};
+```
+
+**Using hooks**
+
+You can seperate logic using Hooks. Turning helper functions into resuable hooks helps separate logic 
+
+```JavaScript
+import { useState, useEffect } from "react";
+
+const useImageURL = () => {
+  const [imageURL, setImageURL] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("https://picsum.photos/v2/list", {
+      headers: {
+        "User-Agent": "the-odin-project"
+      }
+    })
+      .then((response) => {
+        if (response.status >= 400) {
+          throw new Error("server error");
+        }
+        return response.json();
+      })
+      .then((response) => setImageURL(response[0].download_url))
+      .catch((error) => setError(error))
+      .finally(() => setLoading(false));
+  }, []);
+
+  return { imageURL, error, loading };
+};
+
+const Image = () => {
+  const { imageURL, error, loading } = useImageURL();
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>A network error was encountered</p>;
+
+  return (
+    <>
+      <h1>An image</h1>
+      <img src={imageURL} alt={"placeholder text"} />
+    </>
+  );
+};
+```
+
+- `useImageURL` returns `imageURL` `error` and `loading` 
+  - that is ultimately used in the `<Image />` component 
+
+**Managing Multiple Fetch Requests**
+
+- In a full-scale web app youre gonna be making more than 1 API request
+  - You need to be careful on how you organize them.
+
+
+- React dev often face the issue of making multiple requests. 
+  - Thats call _waterfall requests_
+
+
+## Understanding APIs
+
+API (Application Programming Interface) is a protocol that allows one app to talk to another
+- They are essentially the middleman that enables the exchanging of info
+
+There are 2 types of APIs 
+1. REST APIs
+2. GraphQL
+
+REST APIs require HTTP methods to get/send data
+
+**`fetch`**
+
+the `fetch` method allows us to make HTTP requests to the backend. there are multiple HTTP methods:
+GET &rarr; request data
+POST &rarr; send data
+PUT &rarr; update data
+DELETE &rarr; delete data
+
+`fetch` requires 1 param and an optional param
+`fetch(url, options)`
+
+- options can specify the HTTP method 
+```JavaScript
+fetch(url, {
+  method: "GET" 
+});
+```
+
+- GET is the default
+
+For POST:
+```JavaScript
+fetch(url, {
+  method: "POST", 
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({})
+});
+```
+
+Note: `async/await` is often used w/ `try/catch/finally` to catch errors and manage state
+
+Problem w/ API calls in `useEffect`
+The request is NOT cached when pages are revisited
